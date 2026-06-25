@@ -6,7 +6,10 @@ export interface GatewayPagination {
   total: number;
   page: number;
   page_size: number;
-  pages: number;
+  /** Total number of pages. The gateway field name is `total_pages`. */
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
 }
 
 export interface GatewayMeta {

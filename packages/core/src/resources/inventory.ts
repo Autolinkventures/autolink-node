@@ -90,7 +90,7 @@ export class InventoryResource {
       const result = await this.list({ ...filters, page });
       yield result;
       const { pagination } = result.meta;
-      if (!pagination || page >= pagination.pages) break;
+      if (!pagination || page >= pagination.total_pages) break;
       page++;
     }
   }
