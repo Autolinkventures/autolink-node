@@ -2,14 +2,16 @@
   "name": "@autolink/cli",
   "version": "0.1.0",
   "description": "CLI tools for Autolink SDK integration — init and verify",
+  "type": "module",
   "bin": {
-    "autolink": "./dist/index.js"
+    "autolink": "./dist/index.mjs"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/index.mjs",
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
     "clean": "rm -rf dist"
   },
   "dependencies": {

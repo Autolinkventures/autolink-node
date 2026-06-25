@@ -2,6 +2,7 @@
   "name": "@autolink/nextjs",
   "version": "0.1.0",
   "description": "Next.js adapter for @autolink/sdk — ISR, server actions, and cache invalidation",
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,6 +23,7 @@
     "build": "tsup",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
     "clean": "rm -rf dist"
   },
   "dependencies": {

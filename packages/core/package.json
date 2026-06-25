@@ -2,6 +2,7 @@
   "name": "@autolink/sdk",
   "version": "0.1.0",
   "description": "Official Autolink SDK for Node.js — server-side inventory, inquiries, and dealer data",
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
