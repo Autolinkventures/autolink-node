@@ -168,15 +168,18 @@ export interface AutolinkProfile {
   name: string;
   slug: string;
   tagline?: string;
-  description?: string;
+  /** Business description / about text */
+  about?: string;
   phone?: string;
+  whatsapp_number?: string;
   email?: string;
   address?: string;
   city?: string;
   country?: string;
-  logo_url?: string;
-  cover_url?: string;
-  is_publicly_visible: boolean;
+  logo?: string;
+  banner?: string;
+  google_maps_url?: string;
+  is_publicly_visible?: boolean;
 }
 
 // ---------------------------------------------------------------------------
