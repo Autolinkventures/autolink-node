@@ -18,14 +18,16 @@
     "@autolink/sdk": "workspace:*"
   },
   "devDependencies": {
-    "tsup": "^8.3.5",
-    "vitest": "^2.1.8",
     "@types/node": "^22.10.5",
-    "typescript": "^5.7.3"
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.9"
   },
   "engines": {
     "node": ">=20"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "license": "MIT"
 }
