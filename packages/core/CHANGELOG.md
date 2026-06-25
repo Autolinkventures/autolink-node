@@ -1,5 +1,11 @@
 # @autolink/sdk
 
+## 0.2.4
+
+### Patch Changes
+
+- df1d033: Fix AutolinkProfile type to match gateway response fields
+
 ## 0.2.2
 
 ### Patch Changes
