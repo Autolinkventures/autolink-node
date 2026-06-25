@@ -1,5 +1,11 @@
 # @autolink/sdk
 
+## 0.2.2
+
+### Patch Changes
+
+- e331b85: Fix GatewayPagination type to match actual gateway response field names: `total_pages` (was `pages`), add `has_next` and `has_previous` fields.
+
 ## 0.2.1
 
 ### Patch Changes

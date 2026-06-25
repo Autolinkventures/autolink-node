@@ -1,5 +1,12 @@
 # @autolink/nextjs
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [e331b85]
+  - @autolink/sdk@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes
