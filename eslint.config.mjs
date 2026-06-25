@@ -25,4 +25,11 @@ export default [
       "no-console": ["warn", { allow: ["debug", "warn", "error"] }],
     },
   },
+  {
+    // CLI is a terminal tool — console.log is intentional output, not debug noise
+    files: ["packages/cli/src/**/*.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 ];

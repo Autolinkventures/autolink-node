@@ -8,7 +8,8 @@ import {
   AutolinkNetworkError,
   AutolinkError,
 } from "../errors.js";
-import { RetryConfig, isRetryableStatus, backoffMs, sleep } from "./retry.js";
+import type { RetryConfig} from "./retry.js";
+import { isRetryableStatus, backoffMs, sleep } from "./retry.js";
 
 // Internal escape hatch for Autolink engineering only — not documented publicly.
 // Silently ignored when NODE_ENV is "production".

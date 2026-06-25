@@ -1,4 +1,4 @@
-const [, , command, ...args] = process.argv;
+const [, , command] = process.argv;
 
 async function main() {
   switch (command) {

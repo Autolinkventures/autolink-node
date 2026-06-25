@@ -1,4 +1,5 @@
-import { gatewayFetch, FetcherConfig } from "../transport/fetcher.js";
+import type { FetcherConfig } from "../transport/fetcher.js";
+import { gatewayFetch } from "../transport/fetcher.js";
 import type {
   GatewayEnvelope,
   AutolinkVehicle,
