@@ -6,12 +6,14 @@ import { InquiriesResource } from "./resources/inquiries.js";
 import { ProfileResource } from "./resources/profile.js";
 import { ArticlesResource } from "./resources/articles.js";
 import { IntegrationResource } from "./resources/integration.js";
+import type { AutolinkCache } from "./cache/index.js";
 
 export interface AutolinkClientConfig {
   apiKey: string;
   timeout?: number;
   retry?: Partial<RetryConfig>;
   debug?: boolean;
+  cache?: AutolinkCache;
 }
 
 export class AutolinkClient {
@@ -44,10 +46,10 @@ export class AutolinkClient {
       debug: config.debug ?? false,
     };
 
-    this.inventory = new InventoryResource(fetcherConfig);
+    this.inventory = new InventoryResource(fetcherConfig, config.cache);
     this.inquiries = new InquiriesResource(fetcherConfig);
     this.profile = new ProfileResource(fetcherConfig);
-    this.articles = new ArticlesResource(fetcherConfig);
+    this.articles = new ArticlesResource(fetcherConfig, config.cache);
     this.integration = new IntegrationResource(fetcherConfig);
   }
 }

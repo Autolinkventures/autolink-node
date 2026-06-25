@@ -31,3 +31,5 @@ export type {
   AutolinkArticle,
   GatewayEnvelope,
 } from "@autolink/sdk";
+
+export { submitInquiry } from "./actions.js";

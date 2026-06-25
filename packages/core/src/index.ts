@@ -27,3 +27,6 @@ export type {
 } from "./types/index.js";
 
 export { GATEWAY_BASE_URL, GATEWAY_URL, SDK_VERSION } from "./transport/constants.js";
+
+export type { AutolinkCache } from "./cache/index.js";
+export { MemoryCache } from "./cache/index.js";

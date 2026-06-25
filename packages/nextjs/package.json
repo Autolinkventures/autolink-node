@@ -16,6 +16,11 @@
       "types": "./dist/webhook.d.ts",
       "import": "./dist/webhook.js",
       "require": "./dist/webhook.cjs"
+    },
+    "./actions": {
+      "types": "./dist/actions.d.ts",
+      "import": "./dist/actions.js",
+      "require": "./dist/actions.cjs"
     }
   },
   "files": ["dist"],
@@ -27,7 +32,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@autolink/sdk": "workspace:*",
+    "@autolink/sdk": "^0.1.0",
     "server-only": "^0.0.1"
   },
   "peerDependencies": {

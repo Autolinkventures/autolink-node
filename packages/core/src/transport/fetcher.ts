@@ -42,7 +42,7 @@ interface GatewayErrorBody {
   };
 }
 
-function throwFromResponse(status: number, body: GatewayErrorBody): never {
+function throwFromResponse(status: number, body: GatewayErrorBody, headers: Headers): never {
   const { code, message, fields, request_id } = body.error;
   const rid = request_id ?? "";
 
@@ -52,7 +52,8 @@ function throwFromResponse(status: number, body: GatewayErrorBody): never {
   if (status === 400 || status === 422)
     throw new AutolinkValidationError(message, rid, fields ?? {});
   if (status === 429) {
-    throw new AutolinkRateLimitError(message, rid, 60);
+    const retryAfter = parseInt(headers.get("Retry-After") ?? "60", 10);
+    throw new AutolinkRateLimitError(message, rid, retryAfter);
   }
   throw new AutolinkError(message, code ?? "GATEWAY_ERROR", rid);
 }
@@ -125,7 +126,7 @@ export async function gatewayFetch<T>(
           continue;
         }
 
-        throwFromResponse(res.status, errorBody);
+        throwFromResponse(res.status, errorBody, res.headers);
       }
 
       return (await res.json()) as T;

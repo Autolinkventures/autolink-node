@@ -10,6 +10,13 @@ export default defineConfig([
     target: "node20",
   },
   {
+    entry: ["src/actions.ts"],
+    format: ["esm", "cjs"],
+    dts: true,
+    sourcemap: true,
+    target: "node20",
+  },
+  {
     entry: ["src/webhook.ts"],
     format: ["esm", "cjs"],
     dts: false,
