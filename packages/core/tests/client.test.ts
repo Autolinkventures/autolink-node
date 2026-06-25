@@ -3,24 +3,26 @@ import { AutolinkClient } from "../src/client.js";
 
 describe("AutolinkClient constructor", () => {
   it("throws when apiKey is missing", () => {
-    expect(() => new AutolinkClient({ apiKey: "" })).toThrow("apiKey is required");
+    expect(() => new AutolinkClient({ apiKey: "" })).toThrow(
+      "apiKey is required",
+    );
   });
 
   it("throws when apiKey has wrong prefix", () => {
     expect(() => new AutolinkClient({ apiKey: "ak_live_abc" })).toThrow(
-      'must start with "gw_live_" or "gw_test_"'
+      'must start with "gw_live_" or "gw_test_"',
     );
   });
 
   it("accepts gw_live_ prefix", () => {
     expect(
-      () => new AutolinkClient({ apiKey: "gw_live_testkey123" })
+      () => new AutolinkClient({ apiKey: "gw_live_testkey123" }),
     ).not.toThrow();
   });
 
   it("accepts gw_test_ prefix", () => {
     expect(
-      () => new AutolinkClient({ apiKey: "gw_test_testkey123" })
+      () => new AutolinkClient({ apiKey: "gw_test_testkey123" }),
     ).not.toThrow();
   });
 

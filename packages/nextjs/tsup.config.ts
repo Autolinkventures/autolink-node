@@ -17,6 +17,13 @@ export default defineConfig([
     target: "node20",
   },
   {
+    entry: ["src/image-proxy.ts"],
+    format: ["esm", "cjs"],
+    dts: true,
+    sourcemap: true,
+    target: "node20",
+  },
+  {
     entry: ["src/webhook.ts"],
     format: ["esm", "cjs"],
     dts: false,

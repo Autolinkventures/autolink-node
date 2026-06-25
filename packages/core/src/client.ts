@@ -1,4 +1,7 @@
-import { DEFAULT_TIMEOUT_MS, DEFAULT_RETRY_ATTEMPTS } from "./transport/constants.js";
+import {
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_RETRY_ATTEMPTS,
+} from "./transport/constants.js";
 import type { RetryConfig } from "./transport/retry.js";
 import type { FetcherConfig } from "./transport/fetcher.js";
 import { InventoryResource } from "./resources/inventory.js";
@@ -32,7 +35,7 @@ export class AutolinkClient {
       !config.apiKey.startsWith("gw_test_")
     ) {
       throw new Error(
-        'AutolinkClient: apiKey must start with "gw_live_" or "gw_test_"'
+        'AutolinkClient: apiKey must start with "gw_live_" or "gw_test_"',
       );
     }
 

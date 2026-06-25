@@ -15,8 +15,13 @@ function prompt(question: string): Promise<string> {
 
 function detectFramework(): "nextjs" | "node" {
   try {
-    const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf-8")) as Record<string, unknown>;
-    const deps = { ...(pkg["dependencies"] as Record<string, unknown> ?? {}), ...(pkg["devDependencies"] as Record<string, unknown> ?? {}) };
+    const pkg = JSON.parse(
+      readFileSync(join(process.cwd(), "package.json"), "utf-8"),
+    ) as Record<string, unknown>;
+    const deps = {
+      ...((pkg["dependencies"] as Record<string, unknown>) ?? {}),
+      ...((pkg["devDependencies"] as Record<string, unknown>) ?? {}),
+    };
     if ("next" in deps) return "nextjs";
   } catch {}
   return "node";
@@ -44,10 +49,14 @@ export const autolink = new AutolinkClient({
 export async function runInit(): Promise<void> {
   console.log("Autolink SDK setup\n");
 
-  const apiKey = await prompt("Enter your Autolink API key (gw_live_… or gw_test_…): ");
+  const apiKey = await prompt(
+    "Enter your Autolink API key (gw_live_… or gw_test_…): ",
+  );
 
   if (!apiKey.startsWith("gw_live_") && !apiKey.startsWith("gw_test_")) {
-    console.error('\n✗ Invalid key format. Key must start with "gw_live_" or "gw_test_"');
+    console.error(
+      '\n✗ Invalid key format. Key must start with "gw_live_" or "gw_test_"',
+    );
     process.exit(1);
   }
 
@@ -55,10 +64,14 @@ export async function runInit(): Promise<void> {
   try {
     const client = new AutolinkClient({ apiKey, timeout: 8_000 });
     const { data } = await client.integration.check();
-    console.log(`✓ Connected — tenant: ${data.tenant.name} (${data.environment})\n`);
+    console.log(
+      `✓ Connected — tenant: ${data.tenant.name} (${data.environment})\n`,
+    );
   } catch (err) {
     if (err instanceof AutolinkAuthError) {
-      console.error("✗ Key is invalid or revoked. Check your Autolink dashboard.");
+      console.error(
+        "✗ Key is invalid or revoked. Check your Autolink dashboard.",
+      );
     } else {
       console.error(`✗ Could not reach gateway: ${(err as Error).message}`);
     }

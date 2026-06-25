@@ -8,7 +8,7 @@ export class IntegrationResource {
     return gatewayFetch<GatewayEnvelope<IntegrationStatus>>(
       this.config,
       "GET",
-      "/integration"
+      "/integration",
     );
   }
 }

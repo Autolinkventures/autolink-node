@@ -1,4 +1,8 @@
-import { AutolinkClient, AutolinkAuthError, AutolinkForbiddenError } from "@autolink/sdk";
+import {
+  AutolinkClient,
+  AutolinkAuthError,
+  AutolinkForbiddenError,
+} from "@autolink/sdk";
 import { readFileSync } from "fs";
 import { join } from "path";
 

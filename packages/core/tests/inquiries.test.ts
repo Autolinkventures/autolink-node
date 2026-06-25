@@ -19,8 +19,11 @@ const mockInquiry = {
 
 const server = setupServer(
   http.post(`${GATEWAY}/inquiries`, () =>
-    HttpResponse.json({ data: mockInquiry, meta: { request_id: "req_inq" } }, { status: 201 })
-  )
+    HttpResponse.json(
+      { data: mockInquiry, meta: { request_id: "req_inq" } },
+      { status: 201 },
+    ),
+  ),
 );
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -50,7 +53,7 @@ describe("inquiries.create", () => {
         customer_email: "john@example.test",
         message: "General question",
       },
-      { idempotencyKey: "my-ref-123" }
+      { idempotencyKey: "my-ref-123" },
     );
     expect(result.data.customer_name).toBe("Jane Doe");
   });

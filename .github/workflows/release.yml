@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# Queue releases — never cancel a publish mid-flight.
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version or Publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@7088e561eb65bb68695d245aa206f005ef30921d # v4.1.0
+        with:
+          version: 9.15.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Must build before publish — changeset publish does not build.
+      - name: Build
+        run: pnpm build
+
+      # -----------------------------------------------------------------------
+      # Changesets two-phase model:
+      #
+      # ACCUMULATE — while .changeset/*.md files exist on main:
+      #   Opens/updates a PR titled "chore: version packages" with bumped
+      #   package.json versions and updated CHANGELOGs. Nothing is published.
+      #
+      # PUBLISH — when the "chore: version packages" PR is merged:
+      #   No .changeset/*.md files remain. Publishes to npm via Trusted
+      #   Publishing (OIDC — no stored token), then creates a GitHub Release.
+      #
+      # You control WHAT gets versioned by which .changeset files you commit.
+      # You control WHEN it ships by choosing when to merge the Version PR.
+      # -----------------------------------------------------------------------
+      - name: Create Version PR or Publish
+        uses: changesets/action@57dd5be9ba8852146913fabe3c122b219bb90fa2 # v1.4.9
+        with:
+          publish: pnpm exec changeset publish --provenance
+          version: pnpm exec changeset version
+          commit: 'chore: version packages'
+          title: 'chore: version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Trusted Publishing (OIDC) is the primary auth method — id-token:write above.
+          # NPM_TOKEN is a granular token scoped to @autolink as a fallback.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

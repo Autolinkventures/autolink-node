@@ -34,18 +34,24 @@ const server = setupServer(
         request_id: "req_test",
         pagination: { total: 1, page: 1, page_size: 20, pages: 1 },
       },
-    })
+    }),
   ),
 
   http.get(`${GATEWAY}/inventory/toyota-harrier-2022`, () =>
-    HttpResponse.json({ data: mockVehicle, meta: { request_id: "req_test" } })
+    HttpResponse.json({ data: mockVehicle, meta: { request_id: "req_test" } }),
   ),
 
   http.get(`${GATEWAY}/inventory/not-found`, () =>
     HttpResponse.json(
-      { error: { code: "NOT_FOUND", message: "Vehicle not found", request_id: "req_404" } },
-      { status: 404 }
-    )
+      {
+        error: {
+          code: "NOT_FOUND",
+          message: "Vehicle not found",
+          request_id: "req_404",
+        },
+      },
+      { status: 404 },
+    ),
   ),
 
   http.get(`${GATEWAY}/inventory/filter-options`, () =>
@@ -61,8 +67,8 @@ const server = setupServer(
         price_range: { min: 500000, max: 10000000 },
       },
       meta: { request_id: "req_test" },
-    })
-  )
+    }),
+  ),
 );
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -89,7 +95,7 @@ describe("inventory.get", () => {
 
   it("throws AutolinkNotFoundError for missing slug", async () => {
     await expect(client.inventory.get("not-found")).rejects.toBeInstanceOf(
-      AutolinkNotFoundError
+      AutolinkNotFoundError,
     );
   });
 });
@@ -107,34 +113,56 @@ describe("error types", () => {
     server.use(
       http.get(`${GATEWAY}/inventory`, () =>
         HttpResponse.json(
-          { error: { code: "AUTHENTICATION_ERROR", message: "Invalid key", request_id: "req_401" } },
-          { status: 401 }
-        )
-      )
+          {
+            error: {
+              code: "AUTHENTICATION_ERROR",
+              message: "Invalid key",
+              request_id: "req_401",
+            },
+          },
+          { status: 401 },
+        ),
+      ),
     );
-    await expect(client.inventory.list()).rejects.toBeInstanceOf(AutolinkAuthError);
+    await expect(client.inventory.list()).rejects.toBeInstanceOf(
+      AutolinkAuthError,
+    );
   });
 
   it("throws AutolinkForbiddenError on 403", async () => {
     server.use(
       http.get(`${GATEWAY}/inventory`, () =>
         HttpResponse.json(
-          { error: { code: "FORBIDDEN", message: "Missing scope", request_id: "req_403" } },
-          { status: 403 }
-        )
-      )
+          {
+            error: {
+              code: "FORBIDDEN",
+              message: "Missing scope",
+              request_id: "req_403",
+            },
+          },
+          { status: 403 },
+        ),
+      ),
     );
-    await expect(client.inventory.list()).rejects.toBeInstanceOf(AutolinkForbiddenError);
+    await expect(client.inventory.list()).rejects.toBeInstanceOf(
+      AutolinkForbiddenError,
+    );
   });
 
   it("throws AutolinkRateLimitError on 429", async () => {
     server.use(
       http.get(`${GATEWAY}/inventory`, () =>
         HttpResponse.json(
-          { error: { code: "RATE_LIMITED", message: "Too many requests", request_id: "req_429" } },
-          { status: 429 }
-        )
-      )
+          {
+            error: {
+              code: "RATE_LIMITED",
+              message: "Too many requests",
+              request_id: "req_429",
+            },
+          },
+          { status: 429 },
+        ),
+      ),
     );
     const err = await client.inventory.list().catch((e) => e);
     expect(err).toBeInstanceOf(AutolinkRateLimitError);
@@ -152,9 +180,9 @@ describe("error types", () => {
               request_id: "req_400",
             },
           },
-          { status: 400 }
-        )
-      )
+          { status: 400 },
+        ),
+      ),
     );
     const err = await client.inventory.list().catch((e) => e);
     expect(err).toBeInstanceOf(AutolinkValidationError);

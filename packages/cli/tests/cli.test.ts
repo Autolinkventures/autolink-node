@@ -9,10 +9,13 @@ function isValidKeyFormat(key: string): boolean {
 
 function detectFramework(pkgPath: string): "nextjs" | "node" {
   try {
-    const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as Record<string, unknown>;
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as Record<
+      string,
+      unknown
+    >;
     const deps = {
-      ...(pkg["dependencies"] as Record<string, unknown> ?? {}),
-      ...(pkg["devDependencies"] as Record<string, unknown> ?? {}),
+      ...((pkg["dependencies"] as Record<string, unknown>) ?? {}),
+      ...((pkg["devDependencies"] as Record<string, unknown>) ?? {}),
     };
     if ("next" in deps) return "nextjs";
   } catch {
@@ -53,7 +56,7 @@ describe("Framework detection", () => {
   it("detects Next.js when next is in dependencies", () => {
     writeFileSync(
       join(tmpDir, "package.json"),
-      JSON.stringify({ dependencies: { next: "14.0.0", react: "18.0.0" } })
+      JSON.stringify({ dependencies: { next: "14.0.0", react: "18.0.0" } }),
     );
     expect(detectFramework(join(tmpDir, "package.json"))).toBe("nextjs");
   });
@@ -61,7 +64,7 @@ describe("Framework detection", () => {
   it("detects Next.js when next is in devDependencies", () => {
     writeFileSync(
       join(tmpDir, "package.json"),
-      JSON.stringify({ devDependencies: { next: "14.0.0" } })
+      JSON.stringify({ devDependencies: { next: "14.0.0" } }),
     );
     expect(detectFramework(join(tmpDir, "package.json"))).toBe("nextjs");
   });
@@ -69,7 +72,7 @@ describe("Framework detection", () => {
   it("returns node when no next dependency found", () => {
     writeFileSync(
       join(tmpDir, "package.json"),
-      JSON.stringify({ dependencies: { express: "4.0.0" } })
+      JSON.stringify({ dependencies: { express: "4.0.0" } }),
     );
     expect(detectFramework(join(tmpDir, "package.json"))).toBe("node");
   });
@@ -95,12 +98,15 @@ describe(".env.local writing", () => {
     const envPath = join(tmpDir, ".env.local");
     writeFileSync(envPath, `AUTOLINK_API_KEY=gw_test_mykey\n`);
     expect(existsSync(envPath)).toBe(true);
-    expect(readFileSync(envPath, "utf-8")).toContain("AUTOLINK_API_KEY=gw_test_mykey");
+    expect(readFileSync(envPath, "utf-8")).toContain(
+      "AUTOLINK_API_KEY=gw_test_mykey",
+    );
   });
 
   it("does not duplicate AUTOLINK_API_KEY if already present", () => {
     const envPath = join(tmpDir, ".env.local");
-    const existing = "NEXT_PUBLIC_SITE=https://example.com\nAUTOLINK_API_KEY=gw_test_old\n";
+    const existing =
+      "NEXT_PUBLIC_SITE=https://example.com\nAUTOLINK_API_KEY=gw_test_old\n";
     writeFileSync(envPath, existing);
     const content = readFileSync(envPath, "utf-8");
     const occurrences = (content.match(/AUTOLINK_API_KEY/g) ?? []).length;

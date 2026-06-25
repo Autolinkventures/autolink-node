@@ -16,15 +16,13 @@ const RESOURCE_TAGS: Record<string, string[]> = {
 function verifySignature(
   secret: string,
   payload: string,
-  signature: string
+  signature: string,
 ): boolean {
-  const expected = createHmac("sha256", secret)
-    .update(payload)
-    .digest("hex");
+  const expected = createHmac("sha256", secret).update(payload).digest("hex");
   try {
     return timingSafeEqual(
       Buffer.from(signature, "hex"),
-      Buffer.from(expected, "hex")
+      Buffer.from(expected, "hex"),
     );
   } catch {
     return false;
@@ -72,10 +70,10 @@ export function createWebhookHandler(config: WebhookHandlerConfig = {}) {
       // Not in a Next.js context — skip revalidation
     }
 
-    return new Response(
-      JSON.stringify({ ok: true, revalidated: tags }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ ok: true, revalidated: tags }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   };
 }
 

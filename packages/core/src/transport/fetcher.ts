@@ -1,8 +1,4 @@
-import {
-  GATEWAY_URL,
-  DEFAULT_TIMEOUT_MS,
-  SDK_VERSION,
-} from "./constants.js";
+import { GATEWAY_URL, DEFAULT_TIMEOUT_MS, SDK_VERSION } from "./constants.js";
 import {
   AutolinkAuthError,
   AutolinkForbiddenError,
@@ -42,7 +38,11 @@ interface GatewayErrorBody {
   };
 }
 
-function throwFromResponse(status: number, body: GatewayErrorBody, headers: Headers): never {
+function throwFromResponse(
+  status: number,
+  body: GatewayErrorBody,
+  headers: Headers,
+): never {
   const { code, message, fields, request_id } = body.error;
   const rid = request_id ?? "";
 
@@ -67,7 +67,7 @@ export async function gatewayFetch<T>(
     body?: unknown;
     idempotencyKey?: string;
     signal?: AbortSignal;
-  } = {}
+  } = {},
 ): Promise<T> {
   const base = resolveGatewayUrl();
   const url = new URL(`${base}${path}`);
@@ -88,7 +88,8 @@ export async function gatewayFetch<T>(
   }
 
   const isWrite = method === "POST" || method === "PUT" || method === "PATCH";
-  const maxAttempts = isWrite && !options.idempotencyKey ? 1 : config.retry.attempts;
+  const maxAttempts =
+    isWrite && !options.idempotencyKey ? 1 : config.retry.attempts;
 
   let lastError: Error | null = null;
 
@@ -96,7 +97,10 @@ export async function gatewayFetch<T>(
     if (attempt > 0) await sleep(backoffMs(attempt - 1));
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), config.timeout ?? DEFAULT_TIMEOUT_MS);
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      config.timeout ?? DEFAULT_TIMEOUT_MS,
+    );
     const signal = options.signal ?? controller.signal;
 
     try {
@@ -121,7 +125,7 @@ export async function gatewayFetch<T>(
           lastError = new AutolinkError(
             errorBody.error?.message ?? "Gateway error",
             errorBody.error?.code ?? "GATEWAY_ERROR",
-            errorBody.error?.request_id ?? ""
+            errorBody.error?.request_id ?? "",
           );
           continue;
         }
@@ -138,12 +142,15 @@ export async function gatewayFetch<T>(
       const networkErr = err instanceof Error ? err : new Error(String(err));
       lastError = new AutolinkNetworkError(
         `Request to Autolink gateway failed: ${networkErr.message}`,
-        networkErr
+        networkErr,
       );
 
       if (attempt < maxAttempts - 1) continue;
     }
   }
 
-  throw lastError ?? new AutolinkNetworkError("Request failed", new Error("Unknown error"));
+  throw (
+    lastError ??
+    new AutolinkNetworkError("Request failed", new Error("Unknown error"))
+  );
 }

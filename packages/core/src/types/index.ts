@@ -20,45 +20,90 @@ export interface GatewayEnvelope<T> {
 }
 
 // ---------------------------------------------------------------------------
+// Enums — mirrors Django TextChoices from Autolink Backend
+// ---------------------------------------------------------------------------
+
+export type StockStatus = "available" | "reserved" | "sold" | "in_transit";
+export type VehicleCondition = "new" | "locally_used" | "foreign_used";
+
+// ---------------------------------------------------------------------------
 // Inventory
 // ---------------------------------------------------------------------------
 
+/** @deprecated Use cover_image / cover_image_variants instead */
 export interface VehiclePhoto {
   url: string;
   is_primary: boolean;
   caption?: string;
 }
 
+export interface CoverImageVariants {
+  thumb: string;
+  medium: string;
+  large: string;
+  master: string;
+}
+
+export interface VehicleDealer {
+  name: string;
+  slug: string;
+  logo?: string;
+  city?: string;
+  whatsapp_number?: string;
+  public_url?: string;
+}
+
 export interface AutolinkVehicle {
+  /** UUID — internal identifier */
+  id: string;
+  /** URL-safe slug — use this for routes and API calls */
   slug: string;
   title: string;
   make: string;
+  make_id?: string;
   model: string;
+  model_id?: string;
   year: number;
-  price_kes: number;
+  body_type: string;
+  body_type_display?: string;
+  colour?: string;
+  condition: VehicleCondition;
   mileage_km?: number;
-  condition: "new" | "used" | "certified";
-  transmission?: string;
+  engine_size?: number;
   fuel_type?: string;
-  exterior_color?: string;
-  interior_color?: string;
-  engine?: string;
-  body_type?: string;
+  fuel_type_display?: string;
+  transmission?: string;
+  transmission_display?: string;
   drive_type?: string;
-  doors?: number;
-  seats?: number;
+  price_kes: number;
+  is_negotiable?: boolean;
+  has_discount?: boolean;
+  active_discount_price_kes?: number | null;
+  location?: string;
+  stock_status: StockStatus;
+  stock_status_display?: string;
+  is_featured?: boolean;
   description?: string;
-  photos: VehiclePhoto[];
-  listing_status: "published";
-  stock_status: "available" | "sold" | "reserved";
+  features?: string[];
+  /** Primary image URL */
+  cover_image?: string;
+  cover_image_variants?: CoverImageVariants;
+  /** @deprecated Use cover_image instead */
+  photos?: VehiclePhoto[];
+  listing_status?: "published";
   published_at: string;
+  dealer?: VehicleDealer;
+  salesperson?: unknown;
 }
 
 export interface InventoryListFilters {
   make?: string;
   model?: string;
   year?: number;
-  condition?: "new" | "used" | "certified";
+  min_year?: number;
+  max_year?: number;
+  condition?: VehicleCondition;
+  stock_status?: StockStatus;
   min_price?: number;
   max_price?: number;
   min_mileage?: number;
@@ -66,10 +111,10 @@ export interface InventoryListFilters {
   transmission?: string;
   fuel_type?: string;
   body_type?: string;
+  search?: string;
+  ordering?: string;
   page?: number;
   page_size?: number;
-  ordering?: string;
-  search?: string;
   feature_ids?: string;
 }
 
@@ -81,6 +126,8 @@ export interface FilterOptions {
   transmissions: string[];
   fuel_types: string[];
   body_types: string[];
+  stock_statuses?: string[];
+  colours?: string[];
   price_range: { min: number; max: number };
 }
 
@@ -93,6 +140,7 @@ export interface AutolinkInquiryPayload {
   customer_name: string;
   customer_email: string;
   customer_phone?: string;
+  subject?: string;
   message: string;
   vehicle_slug?: string;
 }
@@ -132,10 +180,18 @@ export interface AutolinkProfile {
 // Articles
 // ---------------------------------------------------------------------------
 
+export interface ArticleListFilters {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  ordering?: string;
+}
+
 export interface AutolinkArticle {
   slug: string;
   title: string;
   excerpt?: string;
+  /** Raw HTML from the CMS — sanitize before rendering */
   body: string;
   cover_image_url?: string;
   status: "published";

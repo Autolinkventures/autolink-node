@@ -37,7 +37,7 @@ export class AutolinkValidationError extends AutolinkError {
   constructor(
     message: string,
     requestId: string,
-    fields: Record<string, string[]> = {}
+    fields: Record<string, string[]> = {},
   ) {
     super(message, "VALIDATION_ERROR", requestId);
     this.name = "AutolinkValidationError";

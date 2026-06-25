@@ -2,23 +2,25 @@
 import "server-only";
 
 import { createAutolinkClient } from "./index.js";
-import {
-  AutolinkValidationError,
-  AutolinkAuthError,
-} from "./index.js";
+import { AutolinkValidationError, AutolinkAuthError } from "./index.js";
 
 export async function submitInquiry(
-  payload: FormData | {
-    type?: string;
-    customer_name: string;
-    customer_email: string;
-    customer_phone?: string;
-    subject?: string;
-    message: string;
-    vehicle_slug?: string;
-    metadata?: Record<string, unknown>;
-  }
-): Promise<{ ok: true; data: unknown } | { ok: false; error: string; fields?: Record<string, string[]> }> {
+  payload:
+    | FormData
+    | {
+        type?: string;
+        customer_name: string;
+        customer_email: string;
+        customer_phone?: string;
+        subject?: string;
+        message: string;
+        vehicle_slug?: string;
+        metadata?: Record<string, unknown>;
+      },
+): Promise<
+  | { ok: true; data: unknown }
+  | { ok: false; error: string; fields?: Record<string, string[]> }
+> {
   try {
     const client = createAutolinkClient();
 
@@ -36,11 +38,14 @@ export async function submitInquiry(
       type = (payload.get("type") as string | null) ?? undefined;
       customer_name = (payload.get("customer_name") as string | null) ?? "";
       customer_email = (payload.get("customer_email") as string | null) ?? "";
-      customer_phone = (payload.get("customer_phone") as string | null) ?? undefined;
+      customer_phone =
+        (payload.get("customer_phone") as string | null) ?? undefined;
       subject = (payload.get("subject") as string | null) ?? undefined;
       message = (payload.get("message") as string | null) ?? "";
-      vehicle_slug = (payload.get("vehicle_slug") as string | null) ?? undefined;
-      idempotencyKey = (payload.get("idempotency_key") as string | null) ?? undefined;
+      vehicle_slug =
+        (payload.get("vehicle_slug") as string | null) ?? undefined;
+      idempotencyKey =
+        (payload.get("idempotency_key") as string | null) ?? undefined;
       const rawMetadata = payload.get("metadata");
       if (rawMetadata && typeof rawMetadata === "string") {
         try {
@@ -61,7 +66,9 @@ export async function submitInquiry(
     }
 
     const inquiryPayload = {
-      type: (type ?? (vehicle_slug ? "vehicle" : "general")) as "vehicle" | "general",
+      type: (type ?? (vehicle_slug ? "vehicle" : "general")) as
+        | "vehicle"
+        | "general",
       customer_name,
       customer_email,
       ...(customer_phone ? { customer_phone } : {}),
@@ -76,13 +83,11 @@ export async function submitInquiry(
     });
 
     return { ok: true, data: result };
-  } catch (err) {
+  } catch (err: unknown) {
     if (err instanceof AutolinkValidationError) {
       const fields: Record<string, string[]> = {};
-      if (err.fields) {
-        for (const [key, value] of Object.entries(err.fields)) {
-          fields[key] = Array.isArray(value) ? value : [String(value)];
-        }
+      for (const [key, value] of Object.entries(err.fields)) {
+        fields[key] = Array.isArray(value) ? value : [String(value)];
       }
       return {
         ok: false,
@@ -92,12 +97,16 @@ export async function submitInquiry(
     }
 
     if (err instanceof AutolinkAuthError) {
-      return { ok: false, error: "Authentication failed. Please check your API key." };
+      return {
+        ok: false,
+        error: "Authentication failed. Please check your API key.",
+      };
     }
 
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "An unexpected error occurred",
+      error:
+        err instanceof Error ? err.message : "An unexpected error occurred",
     };
   }
 }

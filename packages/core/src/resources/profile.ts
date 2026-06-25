@@ -8,7 +8,7 @@ export class ProfileResource {
     return gatewayFetch<GatewayEnvelope<AutolinkProfile>>(
       this.config,
       "GET",
-      "/profile"
+      "/profile",
     );
   }
 }

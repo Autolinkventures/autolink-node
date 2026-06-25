@@ -15,14 +15,14 @@ export class InquiriesResource {
 
   async create(
     payload: AutolinkInquiryPayload,
-    options: InquiryCreateOptions = {}
+    options: InquiryCreateOptions = {},
   ): Promise<GatewayEnvelope<AutolinkInquiry>> {
     const idempotencyKey = options.idempotencyKey ?? randomUUID();
     return gatewayFetch<GatewayEnvelope<AutolinkInquiry>>(
       this.config,
       "POST",
       "/inquiries",
-      { body: payload, idempotencyKey }
+      { body: payload, idempotencyKey },
     );
   }
 }

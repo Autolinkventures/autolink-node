@@ -3,7 +3,7 @@ export interface WebhookHandlerConfig {
 }
 
 export declare function createWebhookHandler(
-  config?: WebhookHandlerConfig
+  config?: WebhookHandlerConfig,
 ): (request: Request) => Promise<Response>;
 
 export declare const POST: (request: Request) => Promise<Response>;

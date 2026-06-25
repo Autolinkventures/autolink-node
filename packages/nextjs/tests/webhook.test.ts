@@ -13,7 +13,10 @@ function sign(secret: string, body: string): string {
   return createHmac("sha256", secret).update(body).digest("hex");
 }
 
-function makeRequest(body: string, headers: Record<string, string> = {}): Request {
+function makeRequest(
+  body: string,
+  headers: Record<string, string> = {},
+): Request {
   return new Request("https://example.com/api/autolink/revalidate", {
     method: "POST",
     body,
@@ -36,7 +39,7 @@ describe("createWebhookHandler", () => {
 
     expect(res.status).toBe(200);
     expect(revalidateTag).toHaveBeenCalledWith("inventory");
-    const json = await res.json() as { ok: boolean; revalidated: string[] };
+    const json = (await res.json()) as { ok: boolean; revalidated: string[] };
     expect(json.ok).toBe(true);
     expect(json.revalidated).toContain("inventory");
   });
@@ -47,7 +50,7 @@ describe("createWebhookHandler", () => {
 
     const POST = createWebhookHandler({ secret });
     const res = await POST(
-      makeRequest(body, { "X-Autolink-Signature": sign(secret, body) })
+      makeRequest(body, { "X-Autolink-Signature": sign(secret, body) }),
     );
 
     expect(res.status).toBe(200);
@@ -60,7 +63,7 @@ describe("createWebhookHandler", () => {
 
     const POST = createWebhookHandler({ secret });
     const res = await POST(
-      makeRequest(body, { "X-Autolink-Signature": sign(secret, body) })
+      makeRequest(body, { "X-Autolink-Signature": sign(secret, body) }),
     );
 
     expect(res.status).toBe(200);
@@ -72,7 +75,7 @@ describe("createWebhookHandler", () => {
     const POST = createWebhookHandler({ secret: "correct-secret" });
 
     const res = await POST(
-      makeRequest(body, { "X-Autolink-Signature": "deadbeef" })
+      makeRequest(body, { "X-Autolink-Signature": "deadbeef" }),
     );
 
     expect(res.status).toBe(401);
@@ -95,7 +98,7 @@ describe("createWebhookHandler", () => {
     const POST = createWebhookHandler({ secret });
 
     const res = await POST(
-      makeRequest(body, { "X-Autolink-Signature": sign(secret, body) })
+      makeRequest(body, { "X-Autolink-Signature": sign(secret, body) }),
     );
 
     expect(res.status).toBe(400);
@@ -127,7 +130,7 @@ describe("createWebhookHandler", () => {
 
     // Signature that is the wrong length (not 64 hex chars)
     const res = await POST(
-      makeRequest(body, { "X-Autolink-Signature": "abc" })
+      makeRequest(body, { "X-Autolink-Signature": "abc" }),
     );
 
     expect(res.status).toBe(401);
