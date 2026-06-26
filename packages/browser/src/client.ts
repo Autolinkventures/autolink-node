@@ -91,7 +91,7 @@ class BrowserArticlesResource {
 
 type InquirySubmitPayload = Pick<
   AutolinkInquiryPayload,
-  "customer_name" | "customer_email" | "customer_phone" | "message" | "vehicle_slug" | "subject"
+  "customer_name" | "customer_email" | "customer_phone" | "message" | "vehicle_slug" | "subject" | "type"
 >;
 
 type InquiryResult = { ok: true } | { ok: false; error: string };
@@ -104,9 +104,10 @@ class BrowserInquiriesResource {
       typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const resolvedType = payload.type ?? (payload.vehicle_slug ? "vehicle" : "general");
     try {
       await browserFetch(this.config, "POST", "/inquiries", {
-        body: { ...payload, type: payload.vehicle_slug ? "vehicle" : "general" },
+        body: { ...payload, type: resolvedType },
         idempotencyKey,
       });
       return { ok: true };
