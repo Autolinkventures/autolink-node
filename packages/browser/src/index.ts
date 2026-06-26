@@ -1,5 +1,8 @@
 export { AutolinkBrowserClient } from "./client.js";
-export type { AutolinkBrowserClientOptions, GatewayFilterOptions } from "./client.js";
+export type {
+  AutolinkBrowserClientOptions,
+  GatewayFilterOptions,
+} from "./client.js";
 export { VERSION } from "./version.js";
 export {
   AutolinkError,

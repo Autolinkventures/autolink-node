@@ -56,7 +56,8 @@ function throwFromResponse(
   headers: Headers,
 ): never {
   const { code, message, request_id } = body.error;
-  if (httpStatus === 401 || httpStatus === 403) throw new AutolinkAuthError(message, request_id);
+  if (httpStatus === 401 || httpStatus === 403)
+    throw new AutolinkAuthError(message, request_id);
   if (httpStatus === 404) throw new AutolinkNotFoundError(message, request_id);
   if (httpStatus === 429) {
     const retryAfter = parseInt(headers.get("Retry-After") ?? "60", 10);
@@ -99,7 +100,9 @@ export async function browserFetch<T>(
     const res = await fetch(url.toString(), {
       method,
       headers,
-      ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
+      ...(options.body !== undefined
+        ? { body: JSON.stringify(options.body) }
+        : {}),
       signal: controller.signal,
     });
 
@@ -110,11 +113,13 @@ export async function browserFetch<T>(
     }
 
     if (!res.ok) {
-      const errorBody = await res.json() as { error: { code: string; message: string; request_id: string } };
+      const errorBody = (await res.json()) as {
+        error: { code: string; message: string; request_id: string };
+      };
       throwFromResponse(res.status, errorBody, res.headers);
     }
 
-    return await res.json() as T;
+    return (await res.json()) as T;
   } catch (err) {
     clearTimeout(timeoutId);
     if (err instanceof AutolinkError) throw err;

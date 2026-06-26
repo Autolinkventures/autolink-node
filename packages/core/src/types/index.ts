@@ -137,7 +137,12 @@ export interface FilterOptions {
 // Inquiries
 // ---------------------------------------------------------------------------
 
-export type InquiryType = "vehicle" | "general" | "finance" | "import" | "service";
+export type InquiryType =
+  | "vehicle"
+  | "general"
+  | "finance"
+  | "import"
+  | "service";
 
 export interface AutolinkInquiryPayload {
   type?: InquiryType;

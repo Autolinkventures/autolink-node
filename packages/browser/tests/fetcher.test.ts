@@ -15,11 +15,19 @@ const server = setupServer(
       { status: 404 },
     ),
   ),
-  http.get(`${BASE}/rate-limited`, () =>
-    new HttpResponse(
-      JSON.stringify({ error: { code: "RATE_LIMITED", message: "Too many requests", request_id: "r3" } }),
-      { status: 429, headers: { "Retry-After": "30" } },
-    ),
+  http.get(
+    `${BASE}/rate-limited`,
+    () =>
+      new HttpResponse(
+        JSON.stringify({
+          error: {
+            code: "RATE_LIMITED",
+            message: "Too many requests",
+            request_id: "r3",
+          },
+        }),
+        { status: 429, headers: { "Retry-After": "30" } },
+      ),
   ),
 );
 
@@ -52,7 +60,8 @@ describe("browserFetch", () => {
     let capturedVersion = "";
     server.use(
       http.get(`${BASE}/inventory`, ({ request }) => {
-        capturedVersion = request.headers.get("X-Autolink-Browser-SDK-Version") ?? "";
+        capturedVersion =
+          request.headers.get("X-Autolink-Browser-SDK-Version") ?? "";
         return HttpResponse.json({ data: [], meta: { request_id: "r1" } });
       }),
     );
@@ -73,7 +82,9 @@ describe("browserFetch", () => {
         return HttpResponse.json({ data: [], meta: { request_id: "r1" } });
       }),
     );
-    await browserFetch(config, "GET", "/inventory", { params: { page: 2, make: "Toyota" } });
+    await browserFetch(config, "GET", "/inventory", {
+      params: { page: 2, make: "Toyota" },
+    });
     const url = new URL(capturedUrl);
     expect(url.searchParams.get("page")).toBe("2");
     expect(url.searchParams.get("make")).toBe("Toyota");
@@ -84,7 +95,13 @@ describe("browserFetch", () => {
     server.use(
       http.post(`${BASE}/inquiries`, ({ request }) => {
         capturedIdempotency = request.headers.get("Idempotency-Key") ?? "";
-        return HttpResponse.json({ data: { inquiry_id: "inq1", lead_id: null, test_mode: false }, meta: { request_id: "r4" } }, { status: 201 });
+        return HttpResponse.json(
+          {
+            data: { inquiry_id: "inq1", lead_id: null, test_mode: false },
+            meta: { request_id: "r4" },
+          },
+          { status: 201 },
+        );
       }),
     );
     await browserFetch(config, "POST", "/inquiries", {
@@ -102,7 +119,9 @@ describe("browserFetch", () => {
   });
 
   it("throws AutolinkRateLimitError with retryAfter on 429", async () => {
-    await expect(browserFetch(config, "GET", "/rate-limited")).rejects.toMatchObject({
+    await expect(
+      browserFetch(config, "GET", "/rate-limited"),
+    ).rejects.toMatchObject({
       name: "AutolinkRateLimitError",
       retryAfter: 30,
     });

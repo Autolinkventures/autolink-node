@@ -8,19 +8,66 @@ const BASE = "https://gateway.autolink.ke/sdk/v1";
 const server = setupServer(
   http.get(`${BASE}/inventory`, () =>
     HttpResponse.json({
-      data: [{ id: "1", slug: "toyota-rav4", make: "Toyota", model: "RAV4", year: 2022, body_type: "SUV", condition: "foreign_used", price_kes: 3500000, stock_status: "available", published_at: "2024-01-01" }],
-      meta: { request_id: "r1", pagination: { total: 1, page: 1, page_size: 10, total_pages: 1, has_next: false, has_previous: false } },
+      data: [
+        {
+          id: "1",
+          slug: "toyota-rav4",
+          make: "Toyota",
+          model: "RAV4",
+          year: 2022,
+          body_type: "SUV",
+          condition: "foreign_used",
+          price_kes: 3500000,
+          stock_status: "available",
+          published_at: "2024-01-01",
+        },
+      ],
+      meta: {
+        request_id: "r1",
+        pagination: {
+          total: 1,
+          page: 1,
+          page_size: 10,
+          total_pages: 1,
+          has_next: false,
+          has_previous: false,
+        },
+      },
     }),
   ),
   http.get(`${BASE}/inventory/toyota-rav4`, () =>
     HttpResponse.json({
-      data: { id: "1", slug: "toyota-rav4", make: "Toyota", model: "RAV4", year: 2022, body_type: "SUV", condition: "foreign_used", price_kes: 3500000, stock_status: "available", published_at: "2024-01-01" },
+      data: {
+        id: "1",
+        slug: "toyota-rav4",
+        make: "Toyota",
+        model: "RAV4",
+        year: 2022,
+        body_type: "SUV",
+        condition: "foreign_used",
+        price_kes: 3500000,
+        stock_status: "available",
+        published_at: "2024-01-01",
+      },
       meta: { request_id: "r2" },
     }),
   ),
   http.get(`${BASE}/inventory/toyota-rav4/similar`, () =>
     HttpResponse.json({
-      data: [{ id: "2", slug: "honda-crv", make: "Honda", model: "CR-V", year: 2022, body_type: "SUV", condition: "foreign_used", price_kes: 3200000, stock_status: "available", published_at: "2024-01-01" }],
+      data: [
+        {
+          id: "2",
+          slug: "honda-crv",
+          make: "Honda",
+          model: "CR-V",
+          year: 2022,
+          body_type: "SUV",
+          condition: "foreign_used",
+          price_kes: 3200000,
+          stock_status: "available",
+          published_at: "2024-01-01",
+        },
+      ],
       meta: { request_id: "r7" },
     }),
   ),
@@ -44,25 +91,55 @@ const server = setupServer(
   ),
   http.get(`${BASE}/profile`, () =>
     HttpResponse.json({
-      data: { name: "Ann Car Sales", slug: "anncarsales", phone: "+254714380000" },
+      data: {
+        name: "Ann Car Sales",
+        slug: "anncarsales",
+        phone: "+254714380000",
+      },
       meta: { request_id: "r3" },
     }),
   ),
   http.get(`${BASE}/articles`, () =>
     HttpResponse.json({
-      data: [{ slug: "toyota-rav4-review", title: "RAV4 Review", published_at: "2024-01-01", body: "" }],
-      meta: { request_id: "r5", pagination: { total: 1, page: 1, page_size: 10, total_pages: 1, has_next: false, has_previous: false } },
+      data: [
+        {
+          slug: "toyota-rav4-review",
+          title: "RAV4 Review",
+          published_at: "2024-01-01",
+          body: "",
+        },
+      ],
+      meta: {
+        request_id: "r5",
+        pagination: {
+          total: 1,
+          page: 1,
+          page_size: 10,
+          total_pages: 1,
+          has_next: false,
+          has_previous: false,
+        },
+      },
     }),
   ),
   http.get(`${BASE}/articles/toyota-rav4-review`, () =>
     HttpResponse.json({
-      data: { slug: "toyota-rav4-review", title: "RAV4 Review", published_at: "2024-01-01", body: "<p>Great car</p>", status: "published" },
+      data: {
+        slug: "toyota-rav4-review",
+        title: "RAV4 Review",
+        published_at: "2024-01-01",
+        body: "<p>Great car</p>",
+        status: "published",
+      },
       meta: { request_id: "r6" },
     }),
   ),
   http.post(`${BASE}/inquiries`, () =>
     HttpResponse.json(
-      { data: { inquiry_id: "inq1", lead_id: "lead1", test_mode: false }, meta: { request_id: "r4" } },
+      {
+        data: { inquiry_id: "inq1", lead_id: "lead1", test_mode: false },
+        meta: { request_id: "r4" },
+      },
       { status: 201 },
     ),
   ),
@@ -159,7 +236,13 @@ describe("AutolinkBrowserClient", () => {
     server.use(
       http.post(`${BASE}/inquiries`, ({ request }) => {
         capturedKey = request.headers.get("Idempotency-Key") ?? "";
-        return HttpResponse.json({ data: { inquiry_id: "inq1", lead_id: null, test_mode: false }, meta: { request_id: "r4" } }, { status: 201 });
+        return HttpResponse.json(
+          {
+            data: { inquiry_id: "inq1", lead_id: null, test_mode: false },
+            meta: { request_id: "r4" },
+          },
+          { status: 201 },
+        );
       }),
     );
     const client = init("gw_pub_testkey123");
@@ -174,7 +257,16 @@ describe("AutolinkBrowserClient", () => {
   it("inquiries.submit() returns ok:false on error", async () => {
     server.use(
       http.post(`${BASE}/inquiries`, () =>
-        HttpResponse.json({ error: { code: "VALIDATION_ERROR", message: "Bad input", request_id: "r9" } }, { status: 400 }),
+        HttpResponse.json(
+          {
+            error: {
+              code: "VALIDATION_ERROR",
+              message: "Bad input",
+              request_id: "r9",
+            },
+          },
+          { status: 400 },
+        ),
       ),
     );
     const client = init("gw_pub_testkey123");

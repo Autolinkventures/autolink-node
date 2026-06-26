@@ -32,28 +32,43 @@ export interface GatewayFilterOptions {
 class BrowserInventoryResource {
   constructor(private readonly config: BrowserFetcherConfig) {}
 
-  list(filters: InventoryListFilters = {}): Promise<GatewayEnvelope<AutolinkVehicle[]>> {
+  list(
+    filters: InventoryListFilters = {},
+  ): Promise<GatewayEnvelope<AutolinkVehicle[]>> {
     return browserFetch<GatewayEnvelope<AutolinkVehicle[]>>(
-      this.config, "GET", "/inventory",
-      { params: filters as Record<string, string | number | boolean | undefined> },
+      this.config,
+      "GET",
+      "/inventory",
+      {
+        params: filters as Record<
+          string,
+          string | number | boolean | undefined
+        >,
+      },
     );
   }
 
   get(slug: string): Promise<GatewayEnvelope<AutolinkVehicle>> {
     return browserFetch<GatewayEnvelope<AutolinkVehicle>>(
-      this.config, "GET", `/inventory/${slug}`,
+      this.config,
+      "GET",
+      `/inventory/${slug}`,
     );
   }
 
   filterOptions(): Promise<GatewayEnvelope<GatewayFilterOptions>> {
     return browserFetch<GatewayEnvelope<GatewayFilterOptions>>(
-      this.config, "GET", "/inventory/filter-options",
+      this.config,
+      "GET",
+      "/inventory/filter-options",
     );
   }
 
   similar(slug: string): Promise<GatewayEnvelope<AutolinkVehicle[]>> {
     return browserFetch<GatewayEnvelope<AutolinkVehicle[]>>(
-      this.config, "GET", `/inventory/${slug}/similar`,
+      this.config,
+      "GET",
+      `/inventory/${slug}/similar`,
     );
   }
 }
@@ -64,7 +79,11 @@ class BrowserProfileResource {
   constructor(private readonly config: BrowserFetcherConfig) {}
 
   get(): Promise<GatewayEnvelope<AutolinkProfile>> {
-    return browserFetch<GatewayEnvelope<AutolinkProfile>>(this.config, "GET", "/profile");
+    return browserFetch<GatewayEnvelope<AutolinkProfile>>(
+      this.config,
+      "GET",
+      "/profile",
+    );
   }
 }
 
@@ -73,16 +92,27 @@ class BrowserProfileResource {
 class BrowserArticlesResource {
   constructor(private readonly config: BrowserFetcherConfig) {}
 
-  list(filters: ArticleListFilters = {}): Promise<GatewayEnvelope<AutolinkArticle[]>> {
+  list(
+    filters: ArticleListFilters = {},
+  ): Promise<GatewayEnvelope<AutolinkArticle[]>> {
     return browserFetch<GatewayEnvelope<AutolinkArticle[]>>(
-      this.config, "GET", "/articles",
-      { params: filters as Record<string, string | number | boolean | undefined> },
+      this.config,
+      "GET",
+      "/articles",
+      {
+        params: filters as Record<
+          string,
+          string | number | boolean | undefined
+        >,
+      },
     );
   }
 
   get(slug: string): Promise<GatewayEnvelope<AutolinkArticle>> {
     return browserFetch<GatewayEnvelope<AutolinkArticle>>(
-      this.config, "GET", `/articles/${slug}`,
+      this.config,
+      "GET",
+      `/articles/${slug}`,
     );
   }
 }
@@ -91,7 +121,13 @@ class BrowserArticlesResource {
 
 type InquirySubmitPayload = Pick<
   AutolinkInquiryPayload,
-  "customer_name" | "customer_email" | "customer_phone" | "message" | "vehicle_slug" | "subject" | "type"
+  | "customer_name"
+  | "customer_email"
+  | "customer_phone"
+  | "message"
+  | "vehicle_slug"
+  | "subject"
+  | "type"
 >;
 
 type InquiryResult = { ok: true } | { ok: false; error: string };
@@ -104,7 +140,8 @@ class BrowserInquiriesResource {
       typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const resolvedType = payload.type ?? (payload.vehicle_slug ? "vehicle" : "general");
+    const resolvedType =
+      payload.type ?? (payload.vehicle_slug ? "vehicle" : "general");
     try {
       await browserFetch(this.config, "POST", "/inquiries", {
         body: { ...payload, type: resolvedType },
@@ -112,7 +149,10 @@ class BrowserInquiriesResource {
       });
       return { ok: true };
     } catch (err) {
-      return { ok: false, error: err instanceof Error ? err.message : "Failed to submit inquiry" };
+      return {
+        ok: false,
+        error: err instanceof Error ? err.message : "Failed to submit inquiry",
+      };
     }
   }
 }
@@ -135,7 +175,7 @@ export class AutolinkBrowserClient {
     if (!publicKey.startsWith("gw_pub_")) {
       throw new Error(
         'AutolinkBrowserClient requires a public key starting with "gw_pub_". ' +
-        "Server keys (gw_live_/gw_test_) must never be used in the browser.",
+          "Server keys (gw_live_/gw_test_) must never be used in the browser.",
       );
     }
 
