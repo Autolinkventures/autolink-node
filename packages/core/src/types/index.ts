@@ -103,18 +103,18 @@ export interface InventoryListFilters {
   make?: string;
   model?: string;
   year?: number;
-  min_year?: number;
-  max_year?: number;
+  year_min?: number;
+  year_max?: number;
   condition?: VehicleCondition;
   stock_status?: StockStatus;
-  min_price?: number;
-  max_price?: number;
-  min_mileage?: number;
-  max_mileage?: number;
+  price_min?: number;
+  price_max?: number;
+  mileage_min?: number;
+  mileage_max?: number;
   transmission?: string;
   fuel_type?: string;
   body_type?: string;
-  search?: string;
+  q?: string;
   ordering?: string;
   page?: number;
   page_size?: number;
@@ -189,7 +189,7 @@ export interface AutolinkProfile {
 export interface ArticleListFilters {
   page?: number;
   page_size?: number;
-  search?: string;
+  q?: string;
   ordering?: string;
 }
 
