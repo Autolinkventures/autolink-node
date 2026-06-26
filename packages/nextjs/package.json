@@ -1,6 +1,6 @@
 {
   "name": "@autolink/nextjs",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Next.js adapter for @autolink/sdk — ISR, server actions, and cache invalidation",
   "type": "module",
   "main": "./dist/index.cjs",

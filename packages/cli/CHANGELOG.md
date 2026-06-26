@@ -1,5 +1,12 @@
 # @autolink/cli
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @autolink/sdk@0.2.5
+
 ## 0.1.3
 
 ### Patch Changes

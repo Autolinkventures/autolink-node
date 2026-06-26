@@ -1,5 +1,11 @@
 # @autolink/sdk
 
+## 0.2.5
+
+### Patch Changes
+
+- Fix type alignment with gateway contract: InquiryType union, AutolinkProfile/Article fields, browser inquiry type forwarding, IIFE autolink.min.js output
+
 ## 0.2.4
 
 ### Patch Changes
