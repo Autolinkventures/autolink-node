@@ -2,16 +2,55 @@ name: Release
 
 on:
   push:
-    branches: [main]
+    branches: [main, next]
 
 # Queue releases — never cancel a publish mid-flight.
 concurrency:
-  group: release-main
+  group: release-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
+  beta:
+    name: Publish beta (next branch)
+    if: github.ref_name == 'next'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@7088e561eb65bb68695d245aa206f005ef30921d # v4.1.0
+        with:
+          version: 9.15.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish beta
+        run: pnpm exec changeset publish --tag beta
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   release:
     name: Version or Publish
+    if: github.ref_name == 'main'
     runs-on: ubuntu-latest
 
     permissions:
@@ -33,11 +72,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
 
       # Must build before publish — changeset publish does not build.
       - name: Build

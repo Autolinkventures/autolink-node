@@ -33,6 +33,20 @@ export type VehicleCondition = "new" | "locally_used" | "foreign_used";
 // Inventory
 // ---------------------------------------------------------------------------
 
+export interface VehicleImage {
+  id: string;
+  url: string;
+  thumb?: string;
+  medium?: string;
+  large?: string;
+  master?: string;
+  is_cover: boolean;
+  sort_order?: number;
+  file_kind?: string;
+  caption?: string;
+  title?: string;
+}
+
 /** @deprecated Use cover_image / cover_image_variants instead */
 export interface VehiclePhoto {
   url: string;
@@ -91,8 +105,8 @@ export interface AutolinkVehicle {
   /** Primary image URL */
   cover_image?: string;
   cover_image_variants?: CoverImageVariants;
-  /** @deprecated Use cover_image instead */
-  photos?: VehiclePhoto[];
+  /** All vehicle images — available on detail responses only */
+  images?: VehicleImage[];
   listing_status?: "published";
   published_at: string;
   dealer?: VehicleDealer;

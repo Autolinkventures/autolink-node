@@ -1,5 +1,11 @@
 # @autolink/sdk
 
+## 0.2.6
+
+### Patch Changes
+
+- Add `VehicleImage` interface and `images` field to `AutolinkVehicle` for full gallery support on detail pages
+
 ## 0.2.5
 
 ### Patch Changes
