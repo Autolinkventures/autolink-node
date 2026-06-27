@@ -1,17 +1,15 @@
 import "server-only";
 
-const ALLOWED_DOMAINS = [
+const ALLOWED_DOMAINS = new Set([
   "autolink-archive.fra1.digitaloceanspaces.com",
-  "autolink-archive.fra1.digitaloceanspaces.com",
-];
+]);
+
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024; // 20 MB
 
 function isAllowedUrl(raw: string): boolean {
   try {
-    const { hostname } = new URL(raw);
-    return (
-      ALLOWED_DOMAINS.includes(hostname) ||
-      hostname.endsWith(".digitaloceanspaces.com")
-    );
+    const { protocol, hostname } = new URL(raw);
+    return protocol === "https:" && ALLOWED_DOMAINS.has(hostname);
   } catch {
     return false;
   }
@@ -37,12 +35,18 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   if (!upstream.ok) {
-    return new Response("Upstream image not found", {
-      status: upstream.status,
-    });
+    return new Response("Upstream image not found", { status: upstream.status });
   }
 
-  const contentType = upstream.headers.get("content-type") ?? "image/jpeg";
+  const contentType = upstream.headers.get("content-type") ?? "";
+  if (!contentType.startsWith("image/")) {
+    return new Response("Forbidden: upstream response is not an image", { status: 403 });
+  }
+
+  const contentLength = Number(upstream.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_IMAGE_BYTES) {
+    return new Response("Image too large", { status: 413 });
+  }
 
   return new Response(upstream.body, {
     status: 200,

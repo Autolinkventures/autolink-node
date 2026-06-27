@@ -7,7 +7,7 @@ import type {
   GatewayEnvelope,
   InventoryListFilters,
 } from "@autolink/sdk";
-import { browserFetch } from "./fetcher.js";
+import { browserFetch, AutolinkError, AutolinkRateLimitError } from "./fetcher.js";
 import type { BrowserFetcherConfig } from "./fetcher.js";
 import { VERSION } from "./version.js";
 
@@ -130,7 +130,9 @@ type InquirySubmitPayload = Pick<
   | "type"
 >;
 
-type InquiryResult = { ok: true } | { ok: false; error: string };
+type InquiryResult =
+  | { ok: true }
+  | { ok: false; error: string; code: string; requestId: string; retryAfter?: number };
 
 class BrowserInquiriesResource {
   constructor(private readonly config: BrowserFetcherConfig) {}
@@ -149,9 +151,20 @@ class BrowserInquiriesResource {
       });
       return { ok: true };
     } catch (err) {
+      if (err instanceof AutolinkError) {
+        return {
+          ok: false,
+          error: err.message,
+          code: err.code,
+          requestId: err.requestId,
+          ...(err instanceof AutolinkRateLimitError ? { retryAfter: err.retryAfter } : {}),
+        };
+      }
       return {
         ok: false,
         error: err instanceof Error ? err.message : "Failed to submit inquiry",
+        code: "NETWORK_ERROR",
+        requestId: "",
       };
     }
   }

@@ -2,7 +2,9 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "crypto";
 
 interface WebhookHandlerConfig {
-  secret?: string;
+  secret: string;
+  /** Set to false only in local development to bypass signature verification. */
+  skipVerification?: boolean;
 }
 
 type RevalidateTag = (tag: string) => void;
@@ -29,11 +31,11 @@ function verifySignature(
   }
 }
 
-export function createWebhookHandler(config: WebhookHandlerConfig = {}) {
+export function createWebhookHandler(config: WebhookHandlerConfig) {
   return async function POST(request: Request): Promise<Response> {
     const body = await request.text();
 
-    if (config.secret) {
+    if (!config.skipVerification) {
       const sig = request.headers.get("X-Autolink-Signature") ?? "";
       if (!verifySignature(config.secret, body, sig)) {
         return new Response(JSON.stringify({ error: "Invalid signature" }), {
@@ -77,4 +79,10 @@ export function createWebhookHandler(config: WebhookHandlerConfig = {}) {
   };
 }
 
-export const POST = createWebhookHandler();
+const _webhookSecret = process.env.AUTOLINK_WEBHOOK_SECRET;
+if (!_webhookSecret) {
+  throw new Error(
+    "AUTOLINK_WEBHOOK_SECRET is required. Set it in your environment or use createWebhookHandler({ secret, skipVerification: true }) only for local dev.",
+  );
+}
+export const POST = createWebhookHandler({ secret: _webhookSecret });
