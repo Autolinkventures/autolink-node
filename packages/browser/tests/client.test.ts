@@ -151,8 +151,8 @@ afterAll(() => server.close());
 
 describe("AutolinkBrowserClient", () => {
   it("init() rejects server keys", () => {
-    expect(() => init("gw_live_xxx")).toThrow("public key");
-    expect(() => init("gw_test_xxx")).toThrow("public key");
+    expect(() => init("gw_live_xxx")).toThrow("browser key");
+    expect(() => init("gw_test_xxx")).toThrow("browser key");
   });
 
   it("init() accepts gw_pub_ key", () => {
