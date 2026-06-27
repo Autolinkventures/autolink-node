@@ -1,6 +1,6 @@
 {
   "name": "@autolink/browser",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Autolink browser SDK — embed live dealer inventory without a server",
   "type": "module",
   "main": "./dist/index.cjs",

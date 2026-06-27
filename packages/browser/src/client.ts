@@ -174,7 +174,8 @@ export class AutolinkBrowserClient {
   constructor(publicKey: string, options: AutolinkBrowserClientOptions = {}) {
     if (!publicKey.startsWith("gw_pub_")) {
       throw new Error(
-        'AutolinkBrowserClient requires a public key starting with "gw_pub_". ' +
+        'AutolinkBrowserClient requires a browser key: "gw_pub_test_" for development ' +
+          'or "gw_pub_" for production. ' +
           "Server keys (gw_live_/gw_test_) must never be used in the browser.",
       );
     }

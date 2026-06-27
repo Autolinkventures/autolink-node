@@ -1,5 +1,11 @@
 # @autolink/browser
 
+## 0.2.8
+
+### Patch Changes
+
+- Clarify error message to mention gw*pub_test* as valid browser test key prefix
+
 ## 0.2.7
 
 ### Patch Changes
