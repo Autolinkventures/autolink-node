@@ -2,8 +2,8 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "crypto";
 
 interface WebhookHandlerConfig {
-  secret: string;
-  /** Set to false only in local development to bypass signature verification. */
+  secret?: string;
+  /** Set to true to bypass signature verification. Only safe in local development. */
   skipVerification?: boolean;
 }
 
@@ -31,13 +31,13 @@ function verifySignature(
   }
 }
 
-export function createWebhookHandler(config: WebhookHandlerConfig) {
+export function createWebhookHandler(config: WebhookHandlerConfig = {}) {
   return async function POST(request: Request): Promise<Response> {
     const body = await request.text();
 
-    if (!config.skipVerification) {
+    if (!config.skipVerification && config.secret) {
       const sig = request.headers.get("X-Autolink-Signature") ?? "";
-      if (!verifySignature(config.secret, body, sig)) {
+      if (!verifySignature(config.secret!, body, sig)) {
         return new Response(JSON.stringify({ error: "Invalid signature" }), {
           status: 401,
           headers: { "Content-Type": "application/json" },
@@ -79,10 +79,13 @@ export function createWebhookHandler(config: WebhookHandlerConfig) {
   };
 }
 
-const _webhookSecret = process.env.AUTOLINK_WEBHOOK_SECRET;
-if (!_webhookSecret) {
-  throw new Error(
-    "AUTOLINK_WEBHOOK_SECRET is required. Set it in your environment or use createWebhookHandler({ secret, skipVerification: true }) only for local dev.",
-  );
+export async function POST(request: Request): Promise<Response> {
+  const secret = process.env.AUTOLINK_WEBHOOK_SECRET;
+  if (!secret) {
+    return new Response(
+      JSON.stringify({ error: "AUTOLINK_WEBHOOK_SECRET is not configured." }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+  return createWebhookHandler({ secret })(request);
 }
-export const POST = createWebhookHandler({ secret: _webhookSecret });
