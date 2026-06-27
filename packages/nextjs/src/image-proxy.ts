@@ -35,12 +35,16 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   if (!upstream.ok) {
-    return new Response("Upstream image not found", { status: upstream.status });
+    return new Response("Upstream image not found", {
+      status: upstream.status,
+    });
   }
 
   const contentType = upstream.headers.get("content-type") ?? "";
   if (!contentType.startsWith("image/")) {
-    return new Response("Forbidden: upstream response is not an image", { status: 403 });
+    return new Response("Forbidden: upstream response is not an image", {
+      status: 403,
+    });
   }
 
   const contentLength = Number(upstream.headers.get("content-length") ?? 0);
