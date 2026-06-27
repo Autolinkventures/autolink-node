@@ -11,6 +11,23 @@ import {
 import type { RetryConfig } from "./retry.js";
 import { isRetryableStatus, backoffMs, sleep } from "./retry.js";
 
+const _inflight = new Map<string, Promise<unknown>>();
+
+function buildDedupKey(
+  baseUrl: string,
+  path: string,
+  params?: Record<string, string | number | boolean | undefined>,
+): string {
+  const sortedParams = params
+    ? Object.entries(params)
+        .filter(([, v]) => v !== undefined)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([k, v]) => `${k}=${String(v)}`)
+        .join("&")
+    : "";
+  return `${baseUrl}${path}?${sortedParams}`;
+}
+
 // Internal escape hatch for Autolink engineering only — not documented publicly.
 // Silently ignored when NODE_ENV is "production".
 function resolveGatewayUrl(): string {
@@ -59,7 +76,7 @@ function throwFromResponse(
   throw new AutolinkError(message, code ?? "GATEWAY_ERROR", rid);
 }
 
-export async function gatewayFetch<T>(
+async function actualFetch<T>(
   config: FetcherConfig,
   method: string,
   path: string,
@@ -68,7 +85,7 @@ export async function gatewayFetch<T>(
     body?: unknown;
     idempotencyKey?: string;
     signal?: AbortSignal;
-  } = {},
+  },
 ): Promise<T> {
   const base = resolveGatewayUrl();
   const url = new URL(`${base}${path}`);
@@ -154,4 +171,28 @@ export async function gatewayFetch<T>(
     lastError ??
     new AutolinkNetworkError("Request failed", new Error("Unknown error"))
   );
+}
+
+export async function gatewayFetch<T>(
+  config: FetcherConfig,
+  method: string,
+  path: string,
+  options: {
+    params?: Record<string, string | number | boolean | undefined>;
+    body?: unknown;
+    idempotencyKey?: string;
+    signal?: AbortSignal;
+  } = {},
+): Promise<T> {
+  if (method === "GET") {
+    const dedupKey = buildDedupKey(resolveGatewayUrl(), path, options.params);
+    const existing = _inflight.get(dedupKey);
+    if (existing) return existing as Promise<T>;
+    const promise = actualFetch<T>(config, method, path, options).finally(() =>
+      _inflight.delete(dedupKey),
+    );
+    _inflight.set(dedupKey, promise);
+    return promise;
+  }
+  return actualFetch<T>(config, method, path, options);
 }

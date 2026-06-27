@@ -7,7 +7,11 @@ import type {
   GatewayEnvelope,
   InventoryListFilters,
 } from "@autolink/sdk";
-import { browserFetch, AutolinkError, AutolinkRateLimitError } from "./fetcher.js";
+import {
+  browserFetch,
+  AutolinkError,
+  AutolinkRateLimitError,
+} from "./fetcher.js";
 import type { BrowserFetcherConfig } from "./fetcher.js";
 import { VERSION } from "./version.js";
 
@@ -27,15 +31,45 @@ export interface GatewayFilterOptions {
   mileage_range: { min: number; max: number | null };
 }
 
+// ── Browser memory cache ──────────────────────────────────────────────────────
+
+class BrowserCache {
+  private store = new Map<string, { value: unknown; expiresAt: number }>();
+
+  get(key: string): unknown {
+    const entry = this.store.get(key);
+    if (!entry) return undefined;
+    if (Date.now() > entry.expiresAt) {
+      this.store.delete(key);
+      return undefined;
+    }
+    return entry.value;
+  }
+
+  set(key: string, value: unknown, ttlMs: number): void {
+    this.store.set(key, { value, expiresAt: Date.now() + ttlMs });
+  }
+}
+
 // ── Inventory ─────────────────────────────────────────────────────────────────
 
 class BrowserInventoryResource {
-  constructor(private readonly config: BrowserFetcherConfig) {}
+  constructor(
+    private readonly config: BrowserFetcherConfig,
+    private readonly cache?: BrowserCache,
+    private readonly ttlMs: number = 60_000,
+  ) {}
 
-  list(
+  async list(
     filters: InventoryListFilters = {},
   ): Promise<GatewayEnvelope<AutolinkVehicle[]>> {
-    return browserFetch<GatewayEnvelope<AutolinkVehicle[]>>(
+    const key = `inventory:list:${JSON.stringify(filters)}`;
+    if (this.cache) {
+      const cached = this.cache.get(key);
+      if (cached !== undefined)
+        return cached as GatewayEnvelope<AutolinkVehicle[]>;
+    }
+    const result = await browserFetch<GatewayEnvelope<AutolinkVehicle[]>>(
       this.config,
       "GET",
       "/inventory",
@@ -46,56 +80,104 @@ class BrowserInventoryResource {
         >,
       },
     );
+    this.cache?.set(key, result, this.ttlMs);
+    return result;
   }
 
-  get(slug: string): Promise<GatewayEnvelope<AutolinkVehicle>> {
-    return browserFetch<GatewayEnvelope<AutolinkVehicle>>(
+  async get(slug: string): Promise<GatewayEnvelope<AutolinkVehicle>> {
+    const key = `inventory:${slug}`;
+    if (this.cache) {
+      const cached = this.cache.get(key);
+      if (cached !== undefined)
+        return cached as GatewayEnvelope<AutolinkVehicle>;
+    }
+    const result = await browserFetch<GatewayEnvelope<AutolinkVehicle>>(
       this.config,
       "GET",
       `/inventory/${slug}`,
     );
+    this.cache?.set(key, result, this.ttlMs);
+    return result;
   }
 
-  filterOptions(): Promise<GatewayEnvelope<GatewayFilterOptions>> {
-    return browserFetch<GatewayEnvelope<GatewayFilterOptions>>(
+  async filterOptions(): Promise<GatewayEnvelope<GatewayFilterOptions>> {
+    const key = `inventory:filter-options`;
+    if (this.cache) {
+      const cached = this.cache.get(key);
+      if (cached !== undefined)
+        return cached as GatewayEnvelope<GatewayFilterOptions>;
+    }
+    const result = await browserFetch<GatewayEnvelope<GatewayFilterOptions>>(
       this.config,
       "GET",
       "/inventory/filter-options",
     );
+    this.cache?.set(key, result, this.ttlMs);
+    return result;
   }
 
-  similar(slug: string): Promise<GatewayEnvelope<AutolinkVehicle[]>> {
-    return browserFetch<GatewayEnvelope<AutolinkVehicle[]>>(
+  async similar(slug: string): Promise<GatewayEnvelope<AutolinkVehicle[]>> {
+    const key = `inventory:${slug}:similar`;
+    if (this.cache) {
+      const cached = this.cache.get(key);
+      if (cached !== undefined)
+        return cached as GatewayEnvelope<AutolinkVehicle[]>;
+    }
+    const result = await browserFetch<GatewayEnvelope<AutolinkVehicle[]>>(
       this.config,
       "GET",
       `/inventory/${slug}/similar`,
     );
+    this.cache?.set(key, result, this.ttlMs);
+    return result;
   }
 }
 
 // ── Profile ───────────────────────────────────────────────────────────────────
 
 class BrowserProfileResource {
-  constructor(private readonly config: BrowserFetcherConfig) {}
+  constructor(
+    private readonly config: BrowserFetcherConfig,
+    private readonly cache?: BrowserCache,
+    private readonly ttlMs: number = 60_000,
+  ) {}
 
-  get(): Promise<GatewayEnvelope<AutolinkProfile>> {
-    return browserFetch<GatewayEnvelope<AutolinkProfile>>(
+  async get(): Promise<GatewayEnvelope<AutolinkProfile>> {
+    const key = `profile`;
+    if (this.cache) {
+      const cached = this.cache.get(key);
+      if (cached !== undefined)
+        return cached as GatewayEnvelope<AutolinkProfile>;
+    }
+    const result = await browserFetch<GatewayEnvelope<AutolinkProfile>>(
       this.config,
       "GET",
       "/profile",
     );
+    this.cache?.set(key, result, this.ttlMs);
+    return result;
   }
 }
 
 // ── Articles ──────────────────────────────────────────────────────────────────
 
 class BrowserArticlesResource {
-  constructor(private readonly config: BrowserFetcherConfig) {}
+  constructor(
+    private readonly config: BrowserFetcherConfig,
+    private readonly cache?: BrowserCache,
+    private readonly ttlMs: number = 60_000,
+  ) {}
 
-  list(
+  async list(
     filters: ArticleListFilters = {},
   ): Promise<GatewayEnvelope<AutolinkArticle[]>> {
-    return browserFetch<GatewayEnvelope<AutolinkArticle[]>>(
+    const key = `articles:list:${JSON.stringify(filters)}`;
+    if (this.cache) {
+      const cached = this.cache.get(key);
+      if (cached !== undefined)
+        return cached as GatewayEnvelope<AutolinkArticle[]>;
+    }
+    const result = await browserFetch<GatewayEnvelope<AutolinkArticle[]>>(
       this.config,
       "GET",
       "/articles",
@@ -106,14 +188,24 @@ class BrowserArticlesResource {
         >,
       },
     );
+    this.cache?.set(key, result, this.ttlMs);
+    return result;
   }
 
-  get(slug: string): Promise<GatewayEnvelope<AutolinkArticle>> {
-    return browserFetch<GatewayEnvelope<AutolinkArticle>>(
+  async get(slug: string): Promise<GatewayEnvelope<AutolinkArticle>> {
+    const key = `articles:${slug}`;
+    if (this.cache) {
+      const cached = this.cache.get(key);
+      if (cached !== undefined)
+        return cached as GatewayEnvelope<AutolinkArticle>;
+    }
+    const result = await browserFetch<GatewayEnvelope<AutolinkArticle>>(
       this.config,
       "GET",
       `/articles/${slug}`,
     );
+    this.cache?.set(key, result, this.ttlMs);
+    return result;
   }
 }
 
@@ -132,7 +224,13 @@ type InquirySubmitPayload = Pick<
 
 type InquiryResult =
   | { ok: true }
-  | { ok: false; error: string; code: string; requestId: string; retryAfter?: number };
+  | {
+      ok: false;
+      error: string;
+      code: string;
+      requestId: string;
+      retryAfter?: number;
+    };
 
 class BrowserInquiriesResource {
   constructor(private readonly config: BrowserFetcherConfig) {}
@@ -157,7 +255,9 @@ class BrowserInquiriesResource {
           error: err.message,
           code: err.code,
           requestId: err.requestId,
-          ...(err instanceof AutolinkRateLimitError ? { retryAfter: err.retryAfter } : {}),
+          ...(err instanceof AutolinkRateLimitError
+            ? { retryAfter: err.retryAfter }
+            : {}),
         };
       }
       return {
@@ -176,6 +276,7 @@ export interface AutolinkBrowserClientOptions {
   baseUrl?: string;
   timeout?: number;
   debug?: boolean;
+  cacheTtl?: number; // seconds, default 60, set 0 to disable
 }
 
 export class AutolinkBrowserClient {
@@ -201,9 +302,13 @@ export class AutolinkBrowserClient {
       sdkVersion: VERSION,
     };
 
-    this.inventory = new BrowserInventoryResource(config);
-    this.profile = new BrowserProfileResource(config);
-    this.articles = new BrowserArticlesResource(config);
+    const cacheTtlSeconds = options.cacheTtl ?? 60;
+    const cache = cacheTtlSeconds !== 0 ? new BrowserCache() : undefined;
+    const ttlMs = cacheTtlSeconds * 1000;
+
+    this.inventory = new BrowserInventoryResource(config, cache, ttlMs);
+    this.profile = new BrowserProfileResource(config, cache, ttlMs);
+    this.articles = new BrowserArticlesResource(config, cache, ttlMs);
     this.inquiries = new BrowserInquiriesResource(config);
   }
 }
