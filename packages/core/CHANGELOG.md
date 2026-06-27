@@ -1,5 +1,11 @@
 # @autolink/sdk
 
+## 0.2.7
+
+### Patch Changes
+
+- Accept gw*pub* keys in AutolinkClient constructor validation
+
 ## 0.2.6
 
 ### Patch Changes

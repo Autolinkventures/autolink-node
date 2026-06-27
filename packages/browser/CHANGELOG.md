@@ -1,5 +1,12 @@
 # @autolink/browser
 
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies
+  - @autolink/sdk@0.2.7
+
 ## 0.2.6
 
 ### Patch Changes

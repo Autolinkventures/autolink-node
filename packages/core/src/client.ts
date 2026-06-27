@@ -30,12 +30,13 @@ export class AutolinkClient {
     if (!config.apiKey) {
       throw new Error("AutolinkClient: apiKey is required");
     }
-    if (
-      !config.apiKey.startsWith("gw_live_") &&
-      !config.apiKey.startsWith("gw_test_")
-    ) {
+    const validPrefix =
+      config.apiKey.startsWith("gw_live_") ||
+      config.apiKey.startsWith("gw_test_") ||
+      config.apiKey.startsWith("gw_pub_");
+    if (!validPrefix) {
       throw new Error(
-        'AutolinkClient: apiKey must start with "gw_live_" or "gw_test_"',
+        'AutolinkClient: apiKey must start with "gw_live_", "gw_test_", or "gw_pub_"',
       );
     }
 
