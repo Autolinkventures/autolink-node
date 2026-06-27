@@ -1,5 +1,13 @@
 # @autolink/cli
 
+## 0.2.9
+
+### Patch Changes
+
+- Fix gateway double usage write, stable cache keys, GET request deduplication, browser memory cache, inquiry error details, webhook secret handling, image proxy domain lockdown
+- Updated dependencies
+  - @autolink/sdk@0.2.9
+
 ## 0.2.7
 
 ### Patch Changes
