@@ -8,6 +8,16 @@ import type {
 } from "../types/index.js";
 import type { AutolinkCache } from "../cache/index.js";
 
+function stableKey(obj: Record<string, unknown>): string {
+  return JSON.stringify(
+    Object.fromEntries(
+      Object.entries(obj)
+        .filter(([, v]) => v !== undefined)
+        .sort(([a], [b]) => a.localeCompare(b)),
+    ),
+  );
+}
+
 const TTL_LIST = 300; // 5 minutes
 const TTL_SINGLE = 600; // 10 minutes
 const TTL_FILTER_OPTIONS = 300;
@@ -23,7 +33,7 @@ export class InventoryResource {
     options?: { ttl?: number },
   ): Promise<GatewayEnvelope<AutolinkVehicle[]>> {
     const ttl = options?.ttl ?? TTL_LIST;
-    const key = `autolink:inventory:list:${JSON.stringify(filters)}`;
+    const key = `autolink:inventory:list:${stableKey(filters as Record<string, unknown>)}`;
     if (this.cache && ttl > 0) {
       const cached = await this.cache.get(key);
       if (cached !== undefined)

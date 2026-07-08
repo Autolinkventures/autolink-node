@@ -1,4 +1,4 @@
-# @autolink/cli
+# @autolink/browser
 
 ## 0.2.9
 
@@ -7,6 +7,12 @@
 - Fix gateway double usage write, stable cache keys, GET request deduplication, browser memory cache, inquiry error details, webhook secret handling, image proxy domain lockdown
 - Updated dependencies
   - @autolink/sdk@0.2.9
+
+## 0.2.8
+
+### Patch Changes
+
+- Clarify error message to mention gw*pub_test* as valid browser test key prefix
 
 ## 0.2.7
 
@@ -22,30 +28,10 @@
 - Updated dependencies
   - @autolink/sdk@0.2.6
 
-## 0.1.4
-
-### Patch Changes
-
-- Updated dependencies
-  - @autolink/sdk@0.2.5
-
-## 0.1.3
-
-### Patch Changes
-
-- Updated dependencies [df1d033]
-  - @autolink/sdk@0.2.4
-
-## 0.1.2
-
-### Patch Changes
-
-- Updated dependencies [e331b85]
-  - @autolink/sdk@0.2.2
-
 ## 0.1.1
 
 ### Patch Changes
 
-- Updated dependencies [1af493e]
-  - @autolink/sdk@0.2.1
+- Fix type alignment with gateway contract: InquiryType union, AutolinkProfile/Article fields, browser inquiry type forwarding, IIFE autolink.min.js output
+- Updated dependencies
+  - @autolink/sdk@0.2.5

@@ -33,6 +33,20 @@ export type VehicleCondition = "new" | "locally_used" | "foreign_used";
 // Inventory
 // ---------------------------------------------------------------------------
 
+export interface VehicleImage {
+  id: string;
+  url: string;
+  thumb?: string;
+  medium?: string;
+  large?: string;
+  master?: string;
+  is_cover: boolean;
+  sort_order?: number;
+  file_kind?: string;
+  caption?: string;
+  title?: string;
+}
+
 /** @deprecated Use cover_image / cover_image_variants instead */
 export interface VehiclePhoto {
   url: string;
@@ -91,8 +105,8 @@ export interface AutolinkVehicle {
   /** Primary image URL */
   cover_image?: string;
   cover_image_variants?: CoverImageVariants;
-  /** @deprecated Use cover_image instead */
-  photos?: VehiclePhoto[];
+  /** All vehicle images — available on detail responses only */
+  images?: VehicleImage[];
   listing_status?: "published";
   published_at: string;
   dealer?: VehicleDealer;
@@ -103,18 +117,17 @@ export interface InventoryListFilters {
   make?: string;
   model?: string;
   year?: number;
-  min_year?: number;
-  max_year?: number;
+  year_min?: number;
+  year_max?: number;
   condition?: VehicleCondition;
   stock_status?: StockStatus;
-  min_price?: number;
-  max_price?: number;
-  min_mileage?: number;
-  max_mileage?: number;
+  price_min?: number;
+  price_max?: number;
+  mileage_max?: number;
   transmission?: string;
   fuel_type?: string;
   body_type?: string;
-  search?: string;
+  q?: string;
   ordering?: string;
   page?: number;
   page_size?: number;
@@ -138,10 +151,19 @@ export interface FilterOptions {
 // Inquiries
 // ---------------------------------------------------------------------------
 
+export type InquiryType =
+  | "vehicle"
+  | "general"
+  | "finance"
+  | "import"
+  | "service";
+
 export interface AutolinkInquiryPayload {
-  type: "vehicle" | "general";
+  type?: InquiryType;
   customer_name: string;
-  customer_email: string;
+  /** Required when customer_phone is not provided. */
+  customer_email?: string;
+  /** Required when customer_email is not provided. */
   customer_phone?: string;
   subject?: string;
   message: string;
@@ -168,18 +190,22 @@ export interface AutolinkProfile {
   name: string;
   slug: string;
   tagline?: string;
-  /** Business description / about text */
   about?: string;
-  phone?: string;
-  whatsapp_number?: string;
-  email?: string;
+  logo?: string | null;
+  banner?: string | null;
+  phone?: string | null;
+  whatsapp_number?: string | null;
+  email?: string | null;
+  website_url?: string;
   address?: string;
   city?: string;
-  country?: string;
-  logo?: string;
-  banner?: string;
+  county?: string;
+  county_display?: string;
   google_maps_url?: string;
-  is_publicly_visible?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+  established_year?: number | null;
+  has_location?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,20 +215,31 @@ export interface AutolinkProfile {
 export interface ArticleListFilters {
   page?: number;
   page_size?: number;
-  search?: string;
+  q?: string;
   ordering?: string;
+  category?: string;
+  featured?: boolean;
 }
 
 export interface AutolinkArticle {
+  id: string;
   slug: string;
   title: string;
   excerpt?: string;
-  /** Raw HTML from the CMS — sanitize before rendering */
-  body: string;
-  cover_image_url?: string;
-  status: "published";
+  /** Categories defined by the dealer CMS. */
+  category?: string;
+  tags?: string[];
+  /** Absolute URL to the cover image. */
+  cover_image?: string | null;
+  author_name?: string;
+  author_avatar?: string | null;
+  is_featured?: boolean;
   published_at: string;
-  author?: string;
+  updated_at?: string;
+  /** Only present on detail responses. Raw HTML — sanitize before rendering. */
+  body?: string;
+  meta_title?: string;
+  meta_description?: string;
 }
 
 // ---------------------------------------------------------------------------
