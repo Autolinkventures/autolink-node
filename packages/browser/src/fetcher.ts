@@ -1,6 +1,15 @@
 // Browser-native fetcher — zero Node.js dependencies.
 // Uses window.fetch and browser AbortController only.
 
+const _inflight = new Map<string, Promise<unknown>>();
+
+function buildDedupKey(
+  publicKey: string,
+  url: URL,
+): string {
+  return `${publicKey}:${url.toString()}`;
+}
+
 export interface BrowserFetcherConfig {
   publicKey: string;
   baseUrl: string;
@@ -29,7 +38,7 @@ export class AutolinkNotFoundError extends AutolinkError {
 
 export class AutolinkAuthError extends AutolinkError {
   constructor(message: string, requestId: string) {
-    super(message, "UNAUTHORIZED", requestId);
+    super(message, "AUTHENTICATION_ERROR", requestId);
     this.name = "AutolinkAuthError";
   }
 }
@@ -79,11 +88,37 @@ export async function browserFetch<T>(
   const url = new URL(`${config.baseUrl}${path}`);
 
   if (options.params) {
-    for (const [k, v] of Object.entries(options.params)) {
+    // Sort keys for stable URLs — matches the core SDK's stable behaviour and
+    // ensures the dedup map key is deterministic regardless of caller param order.
+    const sortedKeys = Object.keys(options.params).sort();
+    for (const k of sortedKeys) {
+      const v = options.params[k];
       if (v !== undefined) url.searchParams.set(k, String(v));
     }
   }
 
+  if (method === "GET") {
+    const dedupKey = buildDedupKey(config.publicKey, url);
+    const existing = _inflight.get(dedupKey);
+    if (existing) return existing as Promise<T>;
+    const promise = _actualBrowserFetch<T>(config, method, url, options).finally(
+      () => _inflight.delete(dedupKey),
+    );
+    _inflight.set(dedupKey, promise);
+    return promise;
+  }
+  return _actualBrowserFetch<T>(config, method, url, options);
+}
+
+async function _actualBrowserFetch<T>(
+  config: BrowserFetcherConfig,
+  method: string,
+  url: URL,
+  options: {
+    body?: unknown;
+    idempotencyKey?: string;
+  },
+): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), config.timeout);
 
@@ -109,7 +144,7 @@ export async function browserFetch<T>(
     clearTimeout(timeoutId);
 
     if (config.debug) {
-      console.debug(`[autolink/browser] ${method} ${path} → ${res.status}`);
+      console.debug(`[autolink/browser] ${method} ${url.pathname} → ${res.status}`);
     }
 
     if (!res.ok) {

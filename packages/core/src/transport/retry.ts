@@ -9,8 +9,12 @@ export function isRetryableStatus(status: number): boolean {
   return RETRYABLE_STATUS.has(status);
 }
 
-export function backoffMs(attempt: number): number {
-  const base = 100 * Math.pow(2, attempt);
+export function backoffMs(
+  attempt: number,
+  strategy: "exponential" | "linear" = "exponential",
+): number {
+  const base =
+    strategy === "linear" ? 100 * (attempt + 1) : 100 * Math.pow(2, attempt);
   const jitter = Math.random() * 100;
   return Math.min(base + jitter, 10_000);
 }

@@ -112,14 +112,25 @@ async function actualFetch<T>(
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    if (attempt > 0) await sleep(backoffMs(attempt - 1));
+    if (attempt > 0) await sleep(backoffMs(attempt - 1, config.retry.backoff));
 
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
       config.timeout ?? DEFAULT_TIMEOUT_MS,
     );
-    const signal = options.signal ?? controller.signal;
+    // Wire the caller's signal so external cancellation also aborts the fetch,
+    // without losing the internal timeout.
+    if (options.signal) {
+      if (options.signal.aborted) {
+        controller.abort();
+      } else {
+        options.signal.addEventListener("abort", () => controller.abort(), {
+          once: true,
+        });
+      }
+    }
+    const signal = controller.signal;
 
     try {
       const res = await fetch(url.toString(), {

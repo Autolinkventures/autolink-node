@@ -10,8 +10,14 @@ describe("AutolinkClient constructor", () => {
 
   it("throws when apiKey has wrong prefix", () => {
     expect(() => new AutolinkClient({ apiKey: "ak_live_abc" })).toThrow(
-      'must start with "gw_live_", "gw_test_", or "gw_pub_"',
+      'must start with "gw_live_" or "gw_test_"',
     );
+  });
+
+  it("rejects browser (gw_pub_) keys with a redirect message", () => {
+    expect(
+      () => new AutolinkClient({ apiKey: "gw_pub_abc123" }),
+    ).toThrow("AutolinkBrowserClient");
   });
 
   it("accepts gw_live_ prefix", () => {
