@@ -30,13 +30,18 @@ export class AutolinkClient {
     if (!config.apiKey) {
       throw new Error("AutolinkClient: apiKey is required");
     }
+    if (config.apiKey.startsWith("gw_pub_")) {
+      throw new Error(
+        "AutolinkClient: browser keys (gw_pub_) must not be used in the server SDK. " +
+          "Use AutolinkBrowserClient for browser environments.",
+      );
+    }
     const validPrefix =
       config.apiKey.startsWith("gw_live_") ||
-      config.apiKey.startsWith("gw_test_") ||
-      config.apiKey.startsWith("gw_pub_");
+      config.apiKey.startsWith("gw_test_");
     if (!validPrefix) {
       throw new Error(
-        'AutolinkClient: apiKey must start with "gw_live_", "gw_test_", or "gw_pub_"',
+        'AutolinkClient: apiKey must start with "gw_live_" or "gw_test_".',
       );
     }
 

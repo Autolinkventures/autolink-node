@@ -185,7 +185,7 @@ export async function gatewayFetch<T>(
   } = {},
 ): Promise<T> {
   if (method === "GET") {
-    const dedupKey = buildDedupKey(resolveGatewayUrl(), path, options.params);
+    const dedupKey = `${config.apiKey}:${buildDedupKey(resolveGatewayUrl(), path, options.params)}`;
     const existing = _inflight.get(dedupKey);
     if (existing) return existing as Promise<T>;
     const promise = actualFetch<T>(config, method, path, options).finally(() =>

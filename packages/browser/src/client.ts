@@ -33,6 +33,8 @@ export interface GatewayFilterOptions {
 
 // ── Browser memory cache ──────────────────────────────────────────────────────
 
+const BROWSER_CACHE_MAX_ENTRIES = 200;
+
 class BrowserCache {
   private store = new Map<string, { value: unknown; expiresAt: number }>();
 
@@ -43,10 +45,17 @@ class BrowserCache {
       this.store.delete(key);
       return undefined;
     }
+    // Move to end for LRU ordering.
+    this.store.delete(key);
+    this.store.set(key, entry);
     return entry.value;
   }
 
   set(key: string, value: unknown, ttlMs: number): void {
+    this.store.delete(key);
+    if (this.store.size >= BROWSER_CACHE_MAX_ENTRIES) {
+      this.store.delete(this.store.keys().next().value!);
+    }
     this.store.set(key, { value, expiresAt: Date.now() + ttlMs });
   }
 }
@@ -294,9 +303,19 @@ export class AutolinkBrowserClient {
       );
     }
 
+    // Allow baseUrl override only in test environments (e.g. Vitest/Jest sets NODE_ENV=test).
+    // In browsers process is undefined, so the cast is safe — we never reach .env in that path.
+    const nodeEnv: string | undefined =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      typeof (globalThis as any).process !== "undefined"
+        ? (globalThis as any).process.env?.["NODE_ENV"]
+        : undefined;
+    const resolvedBaseUrl =
+      nodeEnv === "test" ? (options.baseUrl ?? GATEWAY_URL) : GATEWAY_URL;
+
     const config: BrowserFetcherConfig = {
       publicKey,
-      baseUrl: options.baseUrl ?? GATEWAY_URL,
+      baseUrl: resolvedBaseUrl,
       timeout: options.timeout ?? 10_000,
       debug: options.debug ?? false,
       sdkVersion: VERSION,
